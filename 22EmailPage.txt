@@ -1,0 +1,171 @@
+Step 1: Create Apex Class
+Go to:
+Setup → Apex Classes → New
+Class Name:
+EmailController
+Paste this code:
+public class EmailController {
+
+    public String toEmail {get; set;}
+    public String subject {get; set;}
+    public String bodyText {get; set;}
+
+    // File Variables
+    public Blob uploadedFileBody {get; set;}
+    public String uploadedFileName {get; set;}
+
+    // Send Mail
+    public PageReference sendMail() {
+
+        // Email Validation
+        Pattern pattern = Pattern.compile(
+            '^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$'
+        );
+
+        Matcher matcher = pattern.matcher(toEmail);
+
+        if(!matcher.matches()) {
+
+            ApexPages.addMessage(
+
+                new ApexPages.Message(
+
+                    ApexPages.Severity.ERROR,
+                    'Invalid Email ID'
+                )
+            );
+
+            return null;
+        }
+
+        // Create Email
+        Messaging.SingleEmailMessage mail =
+            new Messaging.SingleEmailMessage();
+
+        // Recipient
+        mail.setToAddresses(
+            new String[] {toEmail}
+        );
+
+        // Subject
+        mail.setSubject(subject);
+
+        // Body
+        mail.setPlainTextBody(bodyText);
+
+        // Attachment
+        if(uploadedFileBody != null) {
+
+            Messaging.EmailFileAttachment attachment =
+                new Messaging.EmailFileAttachment();
+
+            attachment.setFileName(uploadedFileName);
+
+            attachment.setBody(uploadedFileBody);
+
+            mail.setFileAttachments(
+
+                new Messaging.EmailFileAttachment[] {
+                    attachment
+                }
+            );
+        }
+
+        // Send Email
+        Messaging.sendEmail(
+
+            new Messaging.SingleEmailMessage[] {mail}
+        );
+
+        ApexPages.addMessage(
+
+            new ApexPages.Message(
+
+                ApexPages.Severity.CONFIRM,
+                'Email Sent Successfully'
+            )
+        );
+
+        return null;
+    }
+}
+
+Save.
+________________________________________
+Step 2: Create Visualforce Page
+Go to:
+Setup → Visualforce Pages → New
+Page Name:
+EmailPage
+Paste:
+<apex:page
+    controller="EmailController"
+    showHeader="true"
+    sidebar="true">
+
+    <apex:form enctype="multipart/form-data">
+
+        <apex:pageBlock title="Send Email">
+
+            <apex:pageMessages/>
+
+            <apex:pageBlockSection columns="1">
+
+                <!-- Email -->
+                <apex:inputText
+                    value="{!toEmail}"
+                    label="Recipient Email"/>
+
+                <!-- Subject -->
+                <apex:inputText
+                    value="{!subject}"
+                    label="Subject"/>
+
+                <!-- Body -->
+                <apex:inputTextarea
+                    value="{!bodyText}"
+                    label="Message Body"/>
+
+                <!-- File Upload -->
+                <apex:inputFile
+                    value="{!uploadedFileBody}"
+                    filename="{!uploadedFileName}"/>
+
+            </apex:pageBlockSection>
+
+            <!-- Button -->
+            <apex:commandButton
+                value="Send Email"
+                action="{!sendMail}"/>
+
+        </apex:pageBlock>
+
+    </apex:form>
+
+</apex:page>
+
+Save.
+________________________________________
+Step 3: Run Visualforce Page
+Click:
+Preview
+OR open:
+/apex/EmailPage
+________________________________________
+How It Works
+Valid Email
+Example:
+abc@gmail.com
+Output:
+●	Email sent successfully
+●	Success message shown
+________________________________________
+Invalid Email
+Example:
+abcgmail.com
+Output:
+●	Email not sent
+●	Error message:
+Invalid Email ID
+shown on frontend.
+

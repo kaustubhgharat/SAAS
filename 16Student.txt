@@ -1,0 +1,201 @@
+   
+
+ 
+
+public class StudentManagement {
+
+    public Student__c studentRec {get; set;}
+    public Id editId {get; set;}
+
+    public StudentManagement() {
+
+        studentRec = new Student__c();
+    }
+
+    // Save or Update Student
+    public PageReference saveStudent() {
+
+        if(editId == null) {
+
+            insert studentRec;
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.CONFIRM,
+                    'Student Added Successfully'
+                )
+            );
+
+        } else {
+
+            update studentRec;
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.CONFIRM,
+                    'Student Updated Successfully'
+                )
+            );
+
+            editId = null;
+        }
+
+        studentRec = new Student__c();
+
+        return null;
+    }
+
+    // View Students
+    public List<Student__c> getStudents() {
+
+        return [
+            SELECT Id,
+                   Student_Name__c,
+                   Roll_Number__c,
+                   Class__c,
+                   Mobile_Number__c
+            FROM Student__c
+        ];
+    }
+
+    // Edit Student
+    public PageReference editStudent() {
+
+        Id sid = ApexPages.currentPage()
+                 .getParameters()
+                 .get('sid');
+
+        studentRec = [
+            SELECT Id,
+                   Student_Name__c,
+                   Roll_Number__c,
+                   Class__c,
+                   Mobile_Number__c
+            FROM Student__c
+            WHERE Id = :sid
+        ];
+
+        editId = sid;
+
+        return null;
+    }
+
+    // Delete Student
+    public PageReference deleteStudent() {
+
+        Id sid = ApexPages.currentPage()
+                 .getParameters()
+                 .get('sid');
+
+        Student__c s = [
+            SELECT Id
+            FROM Student__c
+            WHERE Id = :sid
+        ];
+
+        delete s;
+
+        return null;
+    }
+}
+
+
+
+Setup -> home -> Visualforce Page ->new 
+
+<apex:page controller="StudentManagement">
+
+    <apex:form>
+
+        <apex:pageBlock title="Student Record Management">
+
+            <apex:pageMessages/>
+
+            <apex:pageBlockSection columns="1">
+
+                <apex:inputText
+                    value="{!studentRec.Student_Name__c}"
+                    label="Student Name"/>
+
+                <apex:inputText
+                    value="{!studentRec.Roll_Number__c}"
+                    label="Roll Number"/>
+
+                <apex:inputText
+                    value="{!studentRec.Class__c}"
+                    label="Class"/>
+
+                <apex:inputText
+                    value="{!studentRec.Mobile_Number__c}"
+                    label="Mobile Number"/>
+
+            </apex:pageBlockSection>
+
+            <apex:commandButton
+                value="Save"
+                action="{!saveStudent}"/>
+
+        </apex:pageBlock>
+
+        <br/>
+
+        <apex:pageBlock title="Student List">
+
+            <apex:pageBlockTable
+                value="{!students}"
+                var="s">
+
+                <apex:column
+                    value="{!s.Student_Name__c}"
+                    headerValue="Name"/>
+
+                <apex:column
+                    value="{!s.Roll_Number__c}"
+                    headerValue="Roll No"/>
+
+                <apex:column
+                    value="{!s.Class__c}"
+                    headerValue="Class"/>
+
+                <apex:column
+                    value="{!s.Mobile_Number__c}"
+                    headerValue="Mobile"/>
+
+                <!-- Edit Button -->
+                <apex:column headerValue="Edit">
+
+                    <apex:commandLink
+                        value="Edit"
+                        action="{!editStudent}">
+
+                        <apex:param
+                            name="sid"
+                            value="{!s.Id}"/>
+
+                    </apex:commandLink>
+
+                </apex:column>
+
+                <!-- Delete Button -->
+                <apex:column headerValue="Delete">
+
+                    <apex:commandLink
+                        value="Delete"
+                        action="{!deleteStudent}">
+
+                        <apex:param
+                            name="sid"
+                            value="{!s.Id}"/>
+
+                    </apex:commandLink>
+
+                </apex:column>
+
+            </apex:pageBlockTable>
+
+        </apex:pageBlock>
+
+    </apex:form>
+
+</apex:page>
+

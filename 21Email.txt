@@ -1,0 +1,123 @@
+Step 1: Create Apex Class
+Go to:
+Setup → Apex Classes → New
+Paste this code:
+Without and With Attachment
+public class EmailService {
+
+    // Without Attachment
+    public static void sendEmail(
+
+        String toEmail,
+        String subject,
+        String bodyText
+
+    ) {
+
+        Messaging.SingleEmailMessage mail =
+            new Messaging.SingleEmailMessage();
+
+        // Recipient
+        mail.setToAddresses(
+            new String[] {toEmail}
+        );
+
+        // Subject
+        mail.setSubject(subject);
+
+        // Body
+        mail.setPlainTextBody(bodyText);
+
+        // Send
+        Messaging.sendEmail(
+
+            new Messaging.SingleEmailMessage[] {mail}
+        );
+
+        System.debug('Email Sent Successfully');
+    }
+
+    // With Attachment
+    public static void sendEmailWithAttachment(
+
+        String toEmail,
+        String subject,
+        String bodyText
+
+    ) {
+
+        Messaging.SingleEmailMessage mail =
+            new Messaging.SingleEmailMessage();
+
+        // Recipient
+        mail.setToAddresses(
+            new String[] {toEmail}
+        );
+
+        // Subject
+        mail.setSubject(subject);
+
+        // Body
+        mail.setPlainTextBody(bodyText);
+
+        // Attachment
+        Messaging.EmailFileAttachment attachment =
+            new Messaging.EmailFileAttachment();
+
+        attachment.setFileName('sample.txt');
+
+        attachment.setBody(
+
+            Blob.valueOf(
+                'This isssssssssss sample attachment content'
+            )
+        );
+
+        attachment.setContentType('text/plain');
+
+        // Attach File
+        mail.setFileAttachments(
+
+            new Messaging.EmailFileAttachment[] {attachment}
+        );
+
+        // Send
+        Messaging.sendEmail(
+
+            new Messaging.SingleEmailMessage[] {mail}
+        );
+
+        System.debug('Email Sent Successfully');
+    }
+}
+
+Save class.
+________________________________________
+Step 2: Execute Program
+Open:
+Developer Console → Debug → Open Execute Anonymous Window
+Run:
+Without Attachment
+EmailService.sendEmail(
+
+   'gharatkaustubh36@gmail.com',
+
+   'Test Subject',
+
+   'Hello from Salesforce Apex'
+);
+________________________________________
+With Attachment
+EmailService.sendEmailWithAttachment(
+
+   'gharatkaustubh36@gmail.com',
+
+   'Attachment Mail',
+
+   'This mail contains attachment'
+);
+________________________________________
+Step 3: Check Email Inbox
+Open Gmail/Outlook inbox.
+Email aa jayega.
+
