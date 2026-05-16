@@ -17,7 +17,24 @@ public class EmailController {
     // Send Mail
     public PageReference sendMail() {
 
-        // Email Validation
+        // ---------------- VALIDATIONS ----------------
+
+        // Email Required Validation
+        if(String.isBlank(toEmail)) {
+
+            ApexPages.addMessage(
+
+                new ApexPages.Message(
+
+                    ApexPages.Severity.ERROR,
+                    'Email ID is required'
+                )
+            );
+
+            return null;
+        }
+
+        // Email Format Validation
         Pattern pattern = Pattern.compile(
             '^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$'
         );
@@ -38,7 +55,69 @@ public class EmailController {
             return null;
         }
 
-        // Create Email
+        // Subject Validation
+        if(String.isBlank(subject)) {
+
+            ApexPages.addMessage(
+
+                new ApexPages.Message(
+
+                    ApexPages.Severity.ERROR,
+                    'Subject is required'
+                )
+            );
+
+            return null;
+        }
+
+        // Body Validation
+        if(String.isBlank(bodyText)) {
+
+            ApexPages.addMessage(
+
+                new ApexPages.Message(
+
+                    ApexPages.Severity.ERROR,
+                    'Email Body is required'
+                )
+            );
+
+            return null;
+        }
+
+        // Subject Length Validation
+        if(subject.length() > 100) {
+
+            ApexPages.addMessage(
+
+                new ApexPages.Message(
+
+                    ApexPages.Severity.ERROR,
+                    'Subject cannot exceed 100 characters'
+                )
+            );
+
+            return null;
+        }
+
+        // Attachment Validation
+        if(uploadedFileBody != null &&
+           String.isBlank(uploadedFileName)) {
+
+            ApexPages.addMessage(
+
+                new ApexPages.Message(
+
+                    ApexPages.Severity.ERROR,
+                    'File Name is missing'
+                )
+            );
+
+            return null;
+        }
+
+        // ---------------- CREATE EMAIL ----------------
+
         Messaging.SingleEmailMessage mail =
             new Messaging.SingleEmailMessage();
 

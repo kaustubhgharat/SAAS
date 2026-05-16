@@ -1,7 +1,6 @@
    
 
  
-
 public class StudentManagement {
 
     public Student__c studentRec {get; set;}
@@ -14,6 +13,100 @@ public class StudentManagement {
 
     // Save or Update Student
     public PageReference saveStudent() {
+
+        // ---------------- VALIDATIONS ----------------
+
+        // Name Validation
+        if(String.isBlank(studentRec.Student_Name__c)) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Student Name is required'
+                )
+            );
+
+            return null;
+        }
+
+        // Roll Number Validation
+        if(studentRec.Roll_Number__c == null) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Roll Number is required'
+                )
+            );
+
+            return null;
+        }
+
+        // Class Validation
+        if(String.isBlank(studentRec.Class__c)) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Class is required'
+                )
+            );
+
+            return null;
+        }
+
+        // Mobile Number Validation
+        if(String.isBlank(studentRec.Mobile_Number__c)) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Mobile Number is required'
+                )
+            );
+
+            return null;
+        }
+
+        // Mobile Number must be 10 digits
+        if(
+            !Pattern.matches(
+                '^[0-9]{10}$',
+                studentRec.Mobile_Number__c
+            )
+        ) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Mobile Number must contain exactly 10 digits'
+                )
+            );
+
+            return null;
+        }
+
+        // Duplicate Roll Number Validation
+        List<Student__c> existingStudent = [
+            SELECT Id
+            FROM Student__c
+            WHERE Roll_Number__c = :studentRec.Roll_Number__c
+            AND Id != :editId
+        ];
+
+        if(existingStudent.size() > 0) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Roll Number already exists'
+                )
+            );
+
+            return null;
+        }
+
+        // ---------------- SAVE / UPDATE ----------------
 
         if(editId == null) {
 
@@ -95,10 +188,16 @@ public class StudentManagement {
 
         delete s;
 
+        ApexPages.addMessage(
+            new ApexPages.Message(
+                ApexPages.Severity.CONFIRM,
+                'Student Deleted Successfully'
+            )
+        );
+
         return null;
     }
 }
-
 
 
 Setup -> home -> Visualforce Page ->new 

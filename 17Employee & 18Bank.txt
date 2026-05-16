@@ -5,6 +5,77 @@ public class EmployeeManagement {
                                    String email, Date birthDate,
                                    String dept) {
 
+        // ---------------- VALIDATIONS ----------------
+
+        // Name Validation
+        if(String.isBlank(name)) {
+
+            System.debug('Employee Name is required');
+            return;
+        }
+
+        // Employee ID Validation
+        if(empId == null) {
+
+            System.debug('Employee ID is required');
+            return;
+        }
+
+        // Email Validation
+        if(String.isBlank(email)) {
+
+            System.debug('Email is required');
+            return;
+        }
+
+        // Email Format Validation
+        if(
+            !Pattern.matches(
+                '^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$',
+                email
+            )
+        ) {
+
+            System.debug('Invalid Email Format');
+            return;
+        }
+
+        // Birth Date Validation
+        if(birthDate == null) {
+
+            System.debug('Birth Date is required');
+            return;
+        }
+
+        // Future Date Validation
+        if(birthDate > Date.today()) {
+
+            System.debug('Birth Date cannot be future date');
+            return;
+        }
+
+        // Department Validation
+        if(String.isBlank(dept)) {
+
+            System.debug('Department is required');
+            return;
+        }
+
+        // Duplicate Employee ID Validation
+        List<Employee__c> existingEmp = [
+            SELECT Id
+            FROM Employee__c
+            WHERE Employee_ID__c = :empId
+        ];
+
+        if(existingEmp.size() > 0) {
+
+            System.debug('Employee ID already exists');
+            return;
+        }
+
+        // ---------------- INSERT ----------------
+
         Employee__c e = new Employee__c();
 
         e.Employee_Name__c = name;
@@ -45,12 +116,46 @@ public class EmployeeManagement {
     // UPDATE Employee Email
     public static void updateEmployee(Integer empId, String newEmail) {
 
-        Employee__c e = [
+        // Employee ID Validation
+        if(empId == null) {
+
+            System.debug('Employee ID is required');
+            return;
+        }
+
+        // Email Validation
+        if(String.isBlank(newEmail)) {
+
+            System.debug('New Email is required');
+            return;
+        }
+
+        // Email Format Validation
+        if(
+            !Pattern.matches(
+                '^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$',
+                newEmail
+            )
+        ) {
+
+            System.debug('Invalid Email Format');
+            return;
+        }
+
+        List<Employee__c> empList = [
             SELECT Id, Email__c
             FROM Employee__c
             WHERE Employee_ID__c = :empId
             LIMIT 1
         ];
+
+        if(empList.isEmpty()) {
+
+            System.debug('Employee not found');
+            return;
+        }
+
+        Employee__c e = empList[0];
 
         e.Email__c = newEmail;
 
@@ -62,19 +167,31 @@ public class EmployeeManagement {
     // DELETE Employee
     public static void deleteEmployee(Integer empId) {
 
-        Employee__c e = [
+        // Employee ID Validation
+        if(empId == null) {
+
+            System.debug('Employee ID is required');
+            return;
+        }
+
+        List<Employee__c> empList = [
             SELECT Id
             FROM Employee__c
             WHERE Employee_ID__c = :empId
             LIMIT 1
         ];
 
-        delete e;
+        if(empList.isEmpty()) {
+
+            System.debug('Employee not found');
+            return;
+        }
+
+        delete empList[0];
 
         System.debug('Employee Deleted Successfully');
     }
 }
-
 
 // Add Employee
 EmployeeManagement.addEmployee(

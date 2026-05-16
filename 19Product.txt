@@ -20,8 +20,6 @@ Step 3: Create Apex Class
 Go to:
 Setup → Apex Classes → New
 
-
-
 public class ProductManagement {
 
     public Product__c productRec {get; set;}
@@ -35,6 +33,109 @@ public class ProductManagement {
 
     // Save or Update Product
     public PageReference saveProduct() {
+
+        // ---------------- VALIDATIONS ----------------
+
+        // Product Name Validation
+        if(String.isBlank(productRec.Product_Name__c)) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Product Name is required'
+                )
+            );
+
+            return null;
+        }
+		// Serial Number Validation
+		if(productRec.Serial_No__c == null) {
+
+    		ApexPages.addMessage(
+        		new ApexPages.Message(
+            		ApexPages.Severity.ERROR,
+            		'Serial Number is required'
+        		)
+            );
+
+    		return null;
+		}
+
+        // Manufacture Date Validation
+        if(productRec.Manufacture_Date__c == null) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Manufacture Date is required'
+                )
+            );
+
+            return null;
+        }
+
+        // Expiry Date Validation
+        if(productRec.Expiry_Date__c == null) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Expiry Date is required'
+                )
+            );
+
+            return null;
+        }
+
+        // Manufacture Date cannot be future date
+        if(productRec.Manufacture_Date__c > Date.today()) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Manufacture Date cannot be future date'
+                )
+            );
+
+            return null;
+        }
+
+        // Expiry Date must be greater than Manufacture Date
+        if(productRec.Expiry_Date__c <=
+           productRec.Manufacture_Date__c) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Expiry Date must be greater than Manufacture Date'
+                )
+            );
+
+            return null;
+        }
+
+        // Duplicate Serial Number Validation
+        List<Product__c> existingProduct = [
+
+            SELECT Id
+            FROM Product__c
+            WHERE Serial_No__c = :productRec.Serial_No__c
+            AND Id != :editId
+        ];
+
+        if(existingProduct.size() > 0) {
+
+            ApexPages.addMessage(
+                new ApexPages.Message(
+                    ApexPages.Severity.ERROR,
+                    'Serial Number already exists'
+                )
+            );
+
+            return null;
+        }
+
+        // ---------------- SAVE / UPDATE ----------------
 
         if(editId == null) {
 
@@ -118,6 +219,13 @@ public class ProductManagement {
         ];
 
         delete p;
+
+        ApexPages.addMessage(
+            new ApexPages.Message(
+                ApexPages.Severity.CONFIRM,
+                'Product Deleted Successfully'
+            )
+        );
 
         return null;
     }
